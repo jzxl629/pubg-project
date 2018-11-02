@@ -24,41 +24,72 @@ import java.io.FileNotFoundException;
 import javafx.scene.control.Label;
 import javafx.application.Platform;
 import javafx.scene.control.*;
-
 import java.lang.NumberFormatException;
 
+//This class contains the graphical user interface
 public class GUI extends Application {
+
+    //Stores the width and height of the interface
     private int w = 1000, h = 600;
+
+    //Stores stack one buttons
     private int buttonStackOneCount = 10;
+
+    //Stores stack two buttons
     private int buttonstackTwoCount = 10;
+
+    //Stores the distance between two buttons
     private int btnHeightDiff = 35;
+
+    //Stores the height of the button
     private int bthHeight = 30;
 
+    //Stores the time
     private int seconds = 0;
 
+    //Override the starter method to set up the user interface
     @Override
     public void start(Stage primaryStage) throws FileNotFoundException, InterruptedException {
+
+        //Names the interface
         primaryStage.setTitle("PUBG Map");
+
+        //Creates a new root
         Group root = new Group();
+
+        //Creates a model of the support system
         Model model = new Model();
 
+        //Creates a new grid pane
         GridPane gridPane = new GridPane();
 
-        //Loads the PUBG map
+        //Loads the PUBG map from the directory
         Image map = new Image(new FileInputStream("C:\\Users\\jackl\\Desktop\\project\\WeChat Image_20181029004027.jpg"));
+
+        //Creates a new image view
         ImageView view = new ImageView();
+
+        //Sets the image
         view.setImage(map);
+
+        //Creates a pictureRegion
         final HBox pictureRegion = new HBox();
+
+        //Adds the image to the region
         pictureRegion.getChildren().add(view);
+
+        //Adds the image to the grid pane and sets the indices
         gridPane.add(pictureRegion, 1, 1);
 
 
         //Creates an array for the buttons on top right
         ButtonBase[] btnStackOne = new ButtonBase[buttonStackOneCount];
+        //Creats an array for the names of the buttons
         String[] btnStackOneTxt = new String[buttonStackOneCount];
 
         //Creates an array for second stack of buttons
         ButtonBase[] btnStackTwo = new ButtonBase[buttonStackOneCount];
+        //Creates an array for the names of the second stack of buttons
         String[] btnStackTwoTxt = new String[buttonstackTwoCount];
 
 
@@ -93,10 +124,13 @@ public class GUI extends Application {
         //Timer button that will start the timer when it is pressed and start generating the priorities list
         btnStackTwoTxt[0] = "Start Timer";
         int secs = 0;
+        //Creates a time label that count the game time
         Label timeLabel = new Label("Seconds from start: " + secs);
+        //Sets the indices of the time label
         timeLabel.setLayoutX(610);
         timeLabel.setLayoutY(10);
         root.getChildren().add(timeLabel);
+        //Creates an event handler that starts the timer when the timer button is clicked
         btnStackTwo[0].setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -104,7 +138,7 @@ public class GUI extends Application {
 
                 model.calculateRandomPriorities();
                 model.sortPriorties();
-                Label priorityLabel = new Label(model.toString());
+                Label priorityLabel = new Label(model.objToString()+model.toString());
                 priorityLabel.setLayoutX(610);
                 priorityLabel.setLayoutY(25);
                 root.getChildren().add(priorityLabel);
@@ -119,7 +153,7 @@ public class GUI extends Application {
                                 timeLabel.setText("Seconds from start: " + seconds);
                                 model.calculateRandomPriorities();
                                 model.sortPriorties();
-                                priorityLabel.setText(model.toString());
+                                priorityLabel.setText(model.objToString()+model.toString());
                             }
                         });
                     }
@@ -129,6 +163,7 @@ public class GUI extends Application {
         });
 
 
+        //Names stack two buttons and creates event handlers
         btnStackTwoTxt[1] = "Next Ring";
         btnStackTwo[1].setOnAction(new NextRingHandler());
 
@@ -170,21 +205,27 @@ public class GUI extends Application {
         Label ammo1Count = new Label("Ammo1: ");
         TextField text1 = new TextField();
         text1.setPrefWidth(50);
+        //Creates an event handler that stores the amount of ammo input by users
         text1.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent ke) {
+                //Users can press enter to input the ammo
                 if (ke.getCode().equals(KeyCode.ENTER)) {
                     try {
+                        //Stores the amount of ammo
                         int ammo = Integer.parseInt(text1.getText());
+                        //Sets the amount of ammo1 owned by the player
                         model.getPlayer().setAmmo1(ammo);
                         System.out.println("Ammo1 Count: " + ammo);
                     } catch (NumberFormatException nf) {
+                        //Warns users if their input is not an integer
                         System.out.println("The input is not valid.");
                     }
                 }
             }
         });
 
+        //Adds the textfield to the interface
         HBox hBox = new HBox();
         hBox.getChildren().addAll(ammo1Count, text1);
         hBox.setLayoutX(800);
@@ -201,6 +242,7 @@ public class GUI extends Application {
                 if (ke.getCode().equals(KeyCode.ENTER)) {
                     try {
                         int ammo = Integer.parseInt(text2.getText());
+                        //Sets the amount of ammo2 owned by the player
                         model.getPlayer().setAmmo2(ammo);
                         System.out.println("Ammo2 Count: " + ammo);
                     } catch (NumberFormatException nf) {
@@ -209,6 +251,7 @@ public class GUI extends Application {
                 }
             }
         });
+        //Puts the textfield on the interface
         HBox hbox = new HBox();
         hbox.getChildren().addAll(ammo2Count, text2);
         hbox.setLayoutX(800);
@@ -217,17 +260,21 @@ public class GUI extends Application {
 
 
         //Checks if a user has vehicle at a particular time during the game
+        //Creates a check box
         CheckBox checkbox = new CheckBox("Vehicle");
+        //Checking check box indicates users do have a vehicle
         checkbox.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 if (checkbox.isSelected()) {
+                    //Tells the system that users do have a vehicle
                     model.getPlayer().setVehicle(true);
                 } else {
                     model.getPlayer().setVehicle(false);
                 }
             }
         });
+        //Places the check box in the interface
         checkbox.setLayoutX(800);
         checkbox.setLayoutY(470);
         root.getChildren().add(checkbox);
@@ -249,10 +296,11 @@ public class GUI extends Application {
 
 
         root.getChildren().add(gridPane);
+        //Creates the scene that has width w, height h and white background color
         Scene scene = new Scene(root, w, h, Color.WHITE);//h
         //how big is the window?
 
-
+        //Sets the scene
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -300,7 +348,7 @@ public class GUI extends Application {
         }
     }
 
-
+    //Main method
     public void run(String[] args) {
         launch(args);
     }
