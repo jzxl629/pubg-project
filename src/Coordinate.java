@@ -31,5 +31,12 @@ public class Coordinate {
         this.y = y;
     }
 
+    public double distanceTo(Coordinate c){
+        int dx = this.x - c.getX();
+        int dy = this.y - c.getY();
+        double distance = Math.sqrt(1.0*((dx*dx)+(dy*dy)));
+        return distance;
+    }
+
 
 }

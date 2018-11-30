@@ -1,0 +1,6 @@
+ model.calculateRandomPriorities();
+        model.sortPriorties();
+        Label l = new Label(model.toString());
+        l.setLayoutX(610);
+        l.setLayoutY(25);
+        root.getChildren().add(l);

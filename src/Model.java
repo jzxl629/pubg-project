@@ -7,6 +7,7 @@ public class Model {
     //Initializes a player and a game
     Player player = new Player();
     Game game = new Game();
+    GUI gui;
 
     //Stores the amount of objects
     private final int objCount = 7;
@@ -33,6 +34,7 @@ public class Model {
         for(int i = 0; i<objCount;i++){
             objectives[i] = new Objective(objsnames[i]);
         }
+        game.gui = gui;
     }
     public void calculatePriorities(){
         //todo

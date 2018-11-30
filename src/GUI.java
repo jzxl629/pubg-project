@@ -11,9 +11,12 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 
 import java.util.Timer;
@@ -47,7 +50,18 @@ public class GUI extends Application {
     //Stores the time
     private int seconds = 0;
 
+
+    //Creates an array for the buttons on top right
+    ButtonBase[] btnStackOne = new ButtonBase[buttonStackOneCount];
+    //Creats an array for the names of the buttons
+    String[] btnStackOneTxt = new String[buttonStackOneCount];
+
+    //Creates an array for second stack of buttons
+    ButtonBase[] btnStackTwo = new ButtonBase[buttonStackOneCount];
+    //Creates an array for the names of the second stack of buttons
+    String[] btnStackTwoTxt = new String[buttonstackTwoCount];
     //Override the starter method to set up the user interface
+    private Coordinate lastEntry;
     @Override
     public void start(Stage primaryStage) throws FileNotFoundException, InterruptedException {
 
@@ -59,18 +73,75 @@ public class GUI extends Application {
 
         //Creates a model of the support system
         Model model = new Model();
-
+        model.gui = this;
         //Creates a new grid pane
         GridPane gridPane = new GridPane();
 
         //Loads the PUBG map from the directory
-        Image map = new Image(new FileInputStream("C:\\Users\\jackl\\Desktop\\project\\WeChat Image_20181029004027.jpg"));
+        Image map = new Image(new FileInputStream("C:\\Users\\DELL\\IdeaProjects\\PUBGAnalytics\\src\\WeChat Image_20181029004027.jpg"));
 
         //Creates a new image view
         ImageView view = new ImageView();
-
         //Sets the image
         view.setImage(map);
+
+        Line flightline = new Line();
+        Circle circle = new Circle(135,206,235);
+        view.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                double x = mouseEvent.getX();
+                double y = mouseEvent.getY();
+                System.out.println("X" + x);
+                System.out.println("Y" + y);
+                lastEntry = new Coordinate((int)x,(int)y);
+                if(((ToggleButton)btnStackOne[0]).isSelected()){
+                    model.game.addToFlightPath(lastEntry);
+                    if(model.game.getFlightPath().getState()==2){
+                        //todo fix exception
+                        int x1 = model.game.getFlightPath().getC1().getX();
+                        int y1 = model.game.getFlightPath().getC1().getY();
+                        int x2 = model.game.getFlightPath().getC2().getX();
+                        int y2 = model.game.getFlightPath().getC2().getY();
+                        int x3 = 0;
+                        int y3 = (-1)*x1 *(y1-y2)/(x1-x2) + y1;
+                        int x4 = 600;
+                        int y4 = (600-x1) *(y1-y2)/(x1-x2) + y1;
+                        flightline.setStartX(x3);
+                        flightline.setStartY(y3);
+                        flightline.setEndX(x4);
+                        flightline.setEndY(y4);
+                        flightline.setStrokeWidth(3.0);
+                        root.getChildren().add(flightline);
+                    }else{
+                        flightline.setManaged(false);
+                    }
+                }else if(((ToggleButton)btnStackOne[1]).isSelected()){
+                    SafeZone sz = model.game.getSafeZone();
+                    sz.input(lastEntry);
+                    if(sz.getState()==2){
+                        circle.setCenterX(sz.getCenter().getX());
+                        circle.setCenterY(sz.getCenter().getY());
+                        circle.setRadius(sz.getRadius());
+                        circle.setOpacity(.5);
+                        circle.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                            @Override
+                            public void handle(MouseEvent mouseEvent) {
+                                double x = mouseEvent.getX();
+                                double y = mouseEvent.getY();
+                                System.out.println("X" + x);
+                                System.out.println("Y" + y);
+                                lastEntry = new Coordinate((int)x,(int)y);
+                            }});
+
+                        root.getChildren().add(circle);
+                    }else{
+                        circle.setManaged(false);
+                    }
+                }
+
+            }
+        });
 
         //Creates a pictureRegion
         final HBox pictureRegion = new HBox();
@@ -82,15 +153,6 @@ public class GUI extends Application {
         gridPane.add(pictureRegion, 1, 1);
 
 
-        //Creates an array for the buttons on top right
-        ButtonBase[] btnStackOne = new ButtonBase[buttonStackOneCount];
-        //Creats an array for the names of the buttons
-        String[] btnStackOneTxt = new String[buttonStackOneCount];
-
-        //Creates an array for second stack of buttons
-        ButtonBase[] btnStackTwo = new ButtonBase[buttonStackOneCount];
-        //Creates an array for the names of the second stack of buttons
-        String[] btnStackTwoTxt = new String[buttonstackTwoCount];
 
 
         //initiation
@@ -111,14 +173,41 @@ public class GUI extends Application {
 
         //naming
         //Button 0 coding TODO
+
+        btnStackOne[0] = new ToggleButton();
+        btnStackOne[0].setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event){
+                boolean selected = ((ToggleButton)btnStackOne[0]).isSelected();
+                if(selected) {
+                    unToggle();
+                    ((ToggleButton)btnStackOne[0]).setSelected(true);
+                }
+
+                System.out.println("Flight button toggled to" + ((ToggleButton)btnStackOne[0]).isSelected());
+            }
+        });
         btnStackOneTxt[0] = "Flight Entry";
         //Button 1 coding TODO
         btnStackOne[1] = new ToggleButton();
-        btnStackOneTxt[1] = "Distribution";
+        btnStackOne[1].setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event){
+                boolean selected = ((ToggleButton)btnStackOne[1]).isSelected();
+                if(selected) {
+                    unToggle();
+                    ((ToggleButton)btnStackOne[1]).setSelected(true);
+                }
+
+                System.out.println("safe zone toggled to" + ((ToggleButton)btnStackOne[1]).isSelected());
+            }});
+
+        btnStackOneTxt[1] = "Safe Zone";
         //button 2 coding TODO
         btnStackOne[2] = new Button();
         btnStackOneTxt[2] = "Reset";
         //other button TODO
+
 
 
         //Timer button that will start the timer when it is pressed and start generating the priorities list
@@ -304,6 +393,16 @@ public class GUI extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
+
+    }
+
+    private void unToggle(){
+        int[] toggleIndex = {0,1};
+        for(Integer i: toggleIndex){
+            ToggleButton tb = (ToggleButton) btnStackOne[i];
+            tb.setSelected(false);
+            //todo
+        }
 
     }
 
